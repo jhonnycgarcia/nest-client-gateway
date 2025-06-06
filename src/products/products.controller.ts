@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Inject, InternalServerErrorException, Logger, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 import { PaginationDto } from 'src/common';
 import { PRODUCTS_SERVICE } from 'src/config';
 
 @Controller('products')
 export class ProductsController {
+  private readonly logger = new Logger('ProductsController');
   constructor(
     @Inject(PRODUCTS_SERVICE) private readonly productsClient: ClientProxy,
   ) {}
@@ -20,8 +22,18 @@ export class ProductsController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return `Get product ${id}`;
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    try {
+      const product = await firstValueFrom(
+        this.productsClient.send({ cmd: 'find_one_product' }, { id })
+      );
+      
+      return product;
+      
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new BadRequestException(error);
+    }
   }
 
   @Patch(':id')
