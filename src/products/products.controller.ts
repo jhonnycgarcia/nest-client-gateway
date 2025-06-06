@@ -3,6 +3,8 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError, firstValueFrom } from 'rxjs';
 import { PaginationDto } from 'src/common';
 import { PRODUCTS_SERVICE } from 'src/config';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -12,8 +14,8 @@ export class ProductsController {
   ) {}
 
   @Post()
-  createProduct() {
-    return 'Product created';
+  createProduct(@Body() createProductDto: CreateProductDto) {
+    return this.productsClient.send({ cmd: 'create_product' }, createProductDto);
   }
 
   @Get()
@@ -23,6 +25,7 @@ export class ProductsController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
+    // Como promesa
     try {
       const product = await firstValueFrom(
         this.productsClient.send({ cmd: 'find_one_product' }, { id })
@@ -36,6 +39,7 @@ export class ProductsController {
       throw new RpcException(error);
     }
 
+    // Como observable
     return this.productsClient.send({ cmd: 'find_one_product' }, { id })
       .pipe(
         catchError((error) => {
@@ -48,13 +52,25 @@ export class ProductsController {
   @Patch(':id')
   updateProduct(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: any,
+    @Body() updateProductDto: UpdateProductDto,
   ) {
-    return `Update product ${id} with ${JSON.stringify(body)}`;
+    return this.productsClient.send({ cmd: 'update_product' }, {id, ...updateProductDto})
+      .pipe(
+        catchError((error) => {
+          this.logger.error(error.message);
+          throw new RpcException(error);
+        })
+      );
   }
 
   @Delete(':id')
   deleteProduct(@Param('id', ParseIntPipe) id: number) {
-    return `Delete product ${id}`;
+    return this.productsClient.send({ cmd: 'delete_product' }, { id })
+      .pipe(
+        catchError((error) => {
+          this.logger.error(error.message);
+          throw new RpcException(error);
+        })
+      );
   }
 }
