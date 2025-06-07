@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Param, Logger, Inject } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
+import { CreateOrderDto } from './dto';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { ORDERS_SERVICE } from 'src/config';
 import { catchError } from 'rxjs';
