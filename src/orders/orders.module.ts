@@ -10,8 +10,8 @@ import { ORDERS_SERVICE, envs } from 'src/config';
         name: ORDERS_SERVICE,
         transport: Transport.TCP,
         options: {
-          host: envs.ORDERS_MS_HOST,
-          port: envs.ORDERS_MS_PORT,
+          // host: envs.ORDERS_MS_HOST,
+          // port: envs.ORDERS_MS_PORT,
         },
       },
     ]),
