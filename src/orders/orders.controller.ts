@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, Logger, Inject, ParseUUIDPipe, Query, Patch } from '@nestjs/common';
 import { CreateOrderDto, OrderPaginationDto, StatusDto } from './dto';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { ORDERS_SERVICE } from 'src/config';
+import { NATS_SERVICE } from 'src/config';
 import { catchError } from 'rxjs';
 import { PaginationDto } from 'src/common';
 
@@ -11,12 +11,12 @@ export class OrdersController {
   private readonly logger = new Logger('OrdersController');
 
   constructor(
-    @Inject(ORDERS_SERVICE) private readonly ordersClient: ClientProxy,
+    @Inject(NATS_SERVICE) private readonly client: ClientProxy,
   ) {}
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersClient.send('createOrder', createOrderDto)
+    return this.client.send('createOrder', createOrderDto)
       .pipe(
         catchError((error) => {
           this.logger.error(error.message);
@@ -27,7 +27,7 @@ export class OrdersController {
 
   @Get()
   findAll(@Query() orderPaginationDto: OrderPaginationDto) {
-    return this.ordersClient.send('findAllOrders', orderPaginationDto)
+    return this.client.send('findAllOrders', orderPaginationDto)
       .pipe(
         catchError((error) => {
           this.logger.error(error.message);
@@ -38,7 +38,7 @@ export class OrdersController {
 
   @Get('id/:id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.ordersClient.send('findOneOrder', {id})
+    return this.client.send('findOneOrder', {id})
       .pipe(
         catchError((error) => {
           this.logger.error(error.message);
@@ -53,7 +53,7 @@ export class OrdersController {
     @Query() paginationDto: PaginationDto,
   ) {
     const { status } = statusDto;
-    return this.ordersClient.send('findAllOrders', {
+    return this.client.send('findAllOrders', {
       ...paginationDto,
       status,
     })
@@ -71,7 +71,7 @@ export class OrdersController {
     @Body() statusDto: StatusDto
   ) {
     const { status } = statusDto;
-    return this.ordersClient.send('changeOrderStatus', {id, status})
+    return this.client.send('changeOrderStatus', {id, status})
       .pipe(
         catchError((error) => {
           this.logger.error(error.message);
