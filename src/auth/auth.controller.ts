@@ -40,13 +40,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('verify')
   verifyUser(@User() user: CurrentUser, @Token() token: string) {
-    return this.client.send('auth.verify.user', { user, token })
-      .pipe(
-        catchError((error) => {
-          this.logger.error(error.message);
-          throw new RpcException(error);
-        })
-      );
+    return { user, token }
   }
 
 }
