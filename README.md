@@ -99,6 +99,9 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
   - https://nats.io/
   - ```$ docker run -d --name nats-server-nest -p 4222:4222 -p 6222:6222 -p 8222:8222 nats```
   - https://docs.nestjs.com/microservices/nats
+  
+## Comandos de docker
+- `docker build -f dockerfile.prod -t client-gateway .`
 
 ## License
 
